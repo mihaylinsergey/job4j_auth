@@ -1,23 +1,20 @@
 package ru.job4j.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.domain.Person;
 import ru.job4j.repository.PersonRepository;
-
+import ru.job4j.service.PersonService;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/person")
+@AllArgsConstructor
 public class PersonController {
-    private final PersonRepository persons;
-
-    public PersonController(final PersonRepository persons) {
-        this.persons = persons;
-    }
+    private final PersonService persons;
 
     @GetMapping("/")
     public List<Person> findAll() {
@@ -35,23 +32,28 @@ public class PersonController {
 
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        Optional<Person> rsl = persons.save(person);
         return new ResponseEntity<Person>(
-                this.persons.save(person),
-                HttpStatus.CREATED
+                rsl.orElse(new Person()),
+                rsl.isPresent() ? HttpStatus.CREATED : HttpStatus.CONFLICT
         );
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
-        this.persons.save(person);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Person> update(@RequestBody Person person) {
+        Optional<Person> rsl = persons.update(person);
+        return new ResponseEntity<Person>(
+                rsl.orElse(new Person()),
+                rsl.isPresent() ? HttpStatus.OK : HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<Person> delete(@PathVariable int id) {
         Person person = new Person();
         person.setId(id);
-        this.persons.delete(person);
-        return ResponseEntity.ok().build();
+        Optional<Person> rsl = persons.delete(person);
+        return new ResponseEntity<Person>(
+                rsl.orElse(new Person()),
+                rsl.isPresent() ? HttpStatus.OK : HttpStatus.NO_CONTENT);
     }
 }
