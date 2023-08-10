@@ -35,24 +35,19 @@ public class PersonService {
         return rsl;
     }
 
-    public Optional<Person> delete(Person person) {
-        Optional<Person> rsl = Optional.empty();
-        try {
+    public boolean delete(Person person) {
+        if (findById(person.getId()).isPresent()) {
             personRepository.delete(person);
-            rsl = Optional.of(person);
-        } catch (Exception e) {
-            LOG.error("Error!", e);
+            return true;
         }
-        return rsl;
+        return false;
     }
 
-    public Optional<Person> update(Person person) {
-        Optional<Person> rsl = Optional.empty();
-        try {
-            rsl = Optional.of(personRepository.save(person));
-        } catch (Exception e) {
-            LOG.error("Error!", e);
+    public boolean update(Person person) {
+        if (findById(person.getId()).isPresent()) {
+            personRepository.save(person);
+            return true;
         }
-        return rsl;
+        return false;
     }
 }
