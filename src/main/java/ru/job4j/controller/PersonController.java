@@ -33,8 +33,8 @@ public class PersonController {
 
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
-        Optional<Person> rsl = persons.save(person);
         person.setPassword(encoder.encode(person.getPassword()));
+        Optional<Person> rsl = persons.save(person);
         return new ResponseEntity<Person>(
                 rsl.orElse(new Person()),
                 rsl.isPresent() ? HttpStatus.CREATED : HttpStatus.CONFLICT
