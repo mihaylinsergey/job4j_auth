@@ -64,6 +64,18 @@ public class PersonController {
                 persons.update(person) ? HttpStatus.OK : HttpStatus.NO_CONTENT);
     }
 
+    @PatchMapping("/updatePassword")
+    public ResponseEntity<Person> updatePassword(@RequestBody Person person) {
+        validateForNull(person);
+        Person oldPerson = persons.findByLogin(person.getLogin());
+        if (oldPerson == null) {
+            return new ResponseEntity<>(person, HttpStatus.NO_CONTENT);
+        }
+        oldPerson.setPassword(encoder.encode(person.getPassword()));
+        persons.update(oldPerson);
+        return new ResponseEntity<Person>(oldPerson, HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Person> delete(@PathVariable int id) {
         Person person = new Person();

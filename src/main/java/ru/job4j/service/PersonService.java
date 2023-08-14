@@ -57,6 +57,10 @@ public class PersonService implements UserDetailsService {
         return false;
     }
 
+    public Person findByLogin(String login) {
+        return personRepository.findByLogin(login);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Person user = personRepository.findByLogin(username);
