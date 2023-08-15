@@ -15,6 +15,7 @@ import ru.job4j.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Person> findById(@PathVariable int id) {
+    public ResponseEntity<Person> findById(@Valid @PathVariable int id) {
         var person = this.persons.findById(id);
         return new ResponseEntity<Person>(
                 person.orElse(new Person()),
@@ -45,7 +46,7 @@ public class PersonController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Person> create(@RequestBody Person person) throws SQLException {
+    public ResponseEntity<Person> create(@Valid @RequestBody Person person) throws SQLException {
         validateForNull(person);
         person.setPassword(encoder.encode(person.getPassword()));
         Optional<Person> rsl = persons.save(person);
@@ -59,14 +60,14 @@ public class PersonController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Person> update(@RequestBody Person person) {
+    public ResponseEntity<Person> update(@Valid @RequestBody Person person) {
         validateForNull(person);
         return new ResponseEntity<Person>(person,
                 persons.update(person) ? HttpStatus.OK : HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PersonDto> updatePassword(@RequestBody PersonDto personDto) {
+    public ResponseEntity<PersonDto> updatePassword(@Valid @RequestBody PersonDto personDto) {
         if (personDto.getId() == 0 || personDto.getPassword() == null) {
             throw new NullPointerException("Number and password mustn't be empty");
         }
