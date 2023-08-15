@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.domain.Person;
+import ru.job4j.dto.PersonDto;
 import ru.job4j.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,16 +65,19 @@ public class PersonController {
                 persons.update(person) ? HttpStatus.OK : HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping("/updatePassword")
-    public ResponseEntity<Person> updatePassword(@RequestBody Person person) {
-        validateForNull(person);
-        Person oldPerson = persons.findByLogin(person.getLogin());
-        if (oldPerson == null) {
-            return new ResponseEntity<>(person, HttpStatus.NO_CONTENT);
+    @PatchMapping("/{id}")
+    public ResponseEntity<PersonDto> updatePassword(@RequestBody PersonDto personDto) {
+        if (personDto.getId() == 0 || personDto.getPassword() == null) {
+            throw new NullPointerException("Number and password mustn't be empty");
         }
-        oldPerson.setPassword(encoder.encode(person.getPassword()));
-        persons.update(oldPerson);
-        return new ResponseEntity<Person>(oldPerson, HttpStatus.OK);
+        var optionalPerson = persons.findById(personDto.getId());
+        if (optionalPerson.isEmpty()) {
+            return new ResponseEntity<>(personDto, HttpStatus.NO_CONTENT);
+        }
+        Person updatePerson = optionalPerson.get();
+        updatePerson.setPassword(encoder.encode(personDto.getPassword()));
+        persons.update(updatePerson);
+        return new ResponseEntity<>(personDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
